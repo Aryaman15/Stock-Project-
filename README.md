@@ -44,11 +44,11 @@ Models: `User`, `Instrument`, `Watchlist`, `WatchlistItem`, `UserIntent`, `Marke
 
 ## Market provider
 
-Twelve Data is the only production integration. Set `TWELVE_DATA_API_KEY`; it remains server-only. The adapter normalizes quote/historical data, chronological order, invalid credentials, rate limits, failures, stale values, and missing values. LIVE quote reads are persisted without replacing a newer available observation; REPLAY never calls the provider. Twelve Data may lack trustworthy adjusted history; the resolver intentionally returns `UNSCOREABLE` instead of fabricating performance.
+Twelve Data is the only production integration. Set `TWELVE_DATA_API_KEY`; it remains server-only. The adapter uses `providerInstrumentId` when supplied, otherwise exchange-aware `SYMBOL:NSE` mapping; it normalizes quote/historical data, chronological order, invalid credentials, rate limits, failures, stale values, and missing values. LIVE expectation creation fetches and persists the required historical bars. A backfilled EOD bar retains current `ingestedAt` but receives its legitimate EOD `availableAt`, allowing fair historical replay without making post-close data visible before publication. Only a provider-supplied numeric `adjusted_close` is marked `SAFE`; ordinary Twelve Data close-only data is `UNSAFE`, so the resolver deliberately returns `UNSCOREABLE` rather than fabricating performance.
 
 ## Watching Agent
 
-The deterministic Watching Agent translates natural language only into the three supported templates, asks for missing numeric fields, and needs `/confirm` before it can create an expectation. It can read allowed watchlist/expectation evidence, expected-vs-actual, timeline, and brief. It cannot trade, predict, recommend, invent data, change snapshots/deadlines, override the resolver, or access future replay data. It is not a trading agent.
+The deterministic Watching Agent translates natural language only into the three supported templates, asks for missing numeric fields, and needs `/confirm` before it can create an expectation. Its explicit registry executes search, admissible market snapshot, watchlist item, expectation list/detail, expected-vs-actual, timeline, and brief reads under the session clock. It cannot trade, predict, recommend, invent data, change snapshots/deadlines, override the resolver, or access future replay data. It is not a trading agent.
 
 For “TCS should participate when IT rallies,” it asks for benchmark, trigger percentage, participation ratio, and deadline. Send a valid structured proposal to `/message`; `/confirm` is the explicit creation boundary.
 
