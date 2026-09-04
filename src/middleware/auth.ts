@@ -1,0 +1,3 @@
+import type { NextFunction, Request, Response } from 'express'; import jwt from 'jsonwebtoken'; import { env } from '../config/env.js'; import { AppError } from '../shared/errors.js';
+declare global { namespace Express { interface Request { userId: string; id: string; } } }
+export const auth = (req: Request, _res: Response, next: NextFunction) => { const token = req.header('authorization')?.replace(/^Bearer\s+/i, ''); if (!token) return next(new AppError(401, 'AUTH_REQUIRED', 'Bearer token is required')); try { const payload = jwt.verify(token, env.JWT_SECRET) as jwt.JwtPayload; if (!payload.sub) throw new Error(); req.userId = String(payload.sub); next(); } catch { next(new AppError(401, 'INVALID_TOKEN', 'Token is invalid or expired')); } };

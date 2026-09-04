@@ -1,0 +1,3 @@
+import { MarketObservation } from '../models.js'; import type { Quote, Bar } from '../modules/market/provider.js';
+export async function persistObservation(data:Quote|Bar){const existing:any=await MarketObservation.findOne({instrumentId:data.instrumentId,observedAt:data.observedAt});if(existing&&existing.availableAt>=data.availableAt)return existing;return MarketObservation.findOneAndUpdate({instrumentId:data.instrumentId,observedAt:data.observedAt},{$set:{...data,source:data.provider}},{upsert:true,new:true,setDefaultsOnInsert:true});}
+export async function persistObservations(data:(Quote|Bar)[]){return Promise.all(data.map(persistObservation));}
