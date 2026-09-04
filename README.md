@@ -19,6 +19,8 @@ This backend turns a normal persistent stock watchlist into a record of what the
 | Watching Agent | Required | intent/app | `/watch-agent/sessions` |
 | Orange features | Optional | — | Not implemented |
 
+The automatic `NormalityContract` is separate from an explicit `Expectation`. On stock add, the LIVE path resolves an optional sector benchmark, fetches and persists historical bars when Twelve Data is configured, calculates only adjustment-safe clauses, seals the basis hash, and records contract events. If data is unavailable, the item remains in the watchlist and its contract reports `PENDING_DATA`.
+
 ## Architecture and domain flow
 
 ```text
@@ -72,6 +74,15 @@ All APIs are under `/api/v1`; all except register/login/health need `Authorizati
 | GET | `/expectations/:id/timeline` | replay-aware evidence |
 | POST/GET | `/replay/sessions`, `/replay/sessions/:id` | replay session |
 | POST | `/replay/sessions/:id/advance` | advance clock |
+| GET | `/replay/sessions/:id/dashboard|brief|history` | replay-bounded product views |
+| GET/POST | `/contracts/:id`, `/contracts/:id/resolve` | contract state |
+| GET | `/contracts/:id/timeline` | contract evidence and stored signals |
+| GET | `/history` | owned, filterable, cursor-paginated activity |
+| GET | `/dashboard/overview` | frontend-ready aggregate |
+| GET | `/dashboard/watchlists/:id` | watchlist rows with market/contract/expectation state |
+| GET | `/dashboard/activity` | paginated activity |
+| GET | `/dashboard/history/:instrumentId` | clock-bounded chart markers |
+| GET | `/dashboard/calibration` | deterministic resolved-outcome aggregate |
 | GET/PATCH | `/briefs/return`, `/briefs/:expectationId/state` | return experience/ack |
 | GET | `/briefs/suppressed` | suppression reasons |
 | POST/GET | `/watch-agent/sessions`, `/watch-agent/sessions/:id` | agent session |
